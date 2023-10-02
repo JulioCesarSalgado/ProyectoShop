@@ -1,4 +1,4 @@
-# Proyecto de Ingeniería de Datos
+# Proyecto de Ingeniería de Datos - *TERMINADO.*
 
 Este es un proyecto personal diseñado para demostrar habilidades en Ingeniería de Datos. El proyecto consta de varias partes que trabajan juntas para recopilar, procesar y almacenar datos.
 
