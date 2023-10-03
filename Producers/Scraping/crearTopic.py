@@ -1,7 +1,11 @@
+import os
 from kafka.admin import KafkaAdminClient, NewTopic
 
+
+kafka_host = os.getenv('KAFKA_HOST', 'localhost')
+
 # Crear una instancia de un cliente administrativo de Kafka
-admin_client = KafkaAdminClient(bootstrap_servers='192.168.1.20:9092')
+admin_client = KafkaAdminClient(bootstrap_servers=f'{kafka_host}:9092')
 
 print("Creando topico confirmación.")
 

@@ -17,11 +17,13 @@ from models.catalog_item import CatalogItem
 import timeit
 from kafka import KafkaProducer
 
+# Cargar la variable de entorno KAFKA_HOST
+kafka_host = os.getenv('KAFKA_HOST', 'localhost')
 
 catalog_items = []
 catalog_items_jsonl = []
 
-producer = KafkaProducer(bootstrap_servers='192.168.1.20:9092')
+producer = KafkaProducer(bootstrap_servers=f'{kafka_host}:9092')
 
 # print("Funciona")
 class CarsoSelenium(ABC):
