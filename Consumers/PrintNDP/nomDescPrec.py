@@ -1,7 +1,10 @@
+import os
 import json
 import logging
 import time
 from kafka import KafkaConsumer
+
+kafka_host = os.getenv('KAFKA_HOST', 'localhost')
 
 # Crear un logger
 logger = logging.getLogger()
@@ -16,7 +19,7 @@ stream_handler = logging.StreamHandler()
 logger.addHandler(stream_handler)
 
 # Crear una instancia del consumidor
-consumer = KafkaConsumer(bootstrap_servers='192.168.1.20:9092', auto_offset_reset='latest')
+consumer = KafkaConsumer(bootstrap_servers=f'{kafka_host}:9092', auto_offset_reset='latest')
 
 while True:
     # Verificar si el tema existe

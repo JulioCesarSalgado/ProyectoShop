@@ -1,8 +1,12 @@
+import os
 import json
 import logging
 from kafka import KafkaConsumer
 import mysql.connector
 import time
+
+# Cargar la variable de entorno KAFKA_HOST
+kafka_host = os.getenv('KAFKA_HOST', 'localhost')
 
 # Crear un logger
 logger = logging.getLogger()
@@ -17,7 +21,7 @@ stream_handler = logging.StreamHandler()
 logger.addHandler(stream_handler)
 
 # Crear una instancia del consumidor
-consumer = KafkaConsumer(bootstrap_servers='192.168.1.20:9092', auto_offset_reset='earliest')
+consumer = KafkaConsumer(bootstrap_servers=f'{kafka_host}:9092', auto_offset_reset='earliest')
 
 while True:
     # Verificar si el tema existe
@@ -30,7 +34,7 @@ while True:
 
 # Crear una conexión a la base de datos
 db = mysql.connector.connect(
-  host="192.168.1.20",
+  host=kafka_host,
   user="usuario",
   password="ejemplo",
 )
