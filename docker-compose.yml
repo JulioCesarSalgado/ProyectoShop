@@ -6,6 +6,9 @@ services:
       - '2181:2181'
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
+    volumes:
+      - ./Data/zookeeper_data:/bitnami/zookeeper
+    user: root
 
   kafka:
     image: bitnami/kafka:3.5.1
@@ -31,6 +34,10 @@ services:
       - KAFKA_CFG_GROUP_INITIAL_REBALANCE_DELAY_MS=0
     depends_on:
       - zookeeper
+    volumes:
+      - ./Data/kafka_data:/bitnami/kafka
+    user: root
+
 
   producer_scrapy:
     image: chasen64/scrapingshop:6.0.0
@@ -63,3 +70,4 @@ services:
     shm_size: '2g'
     depends_on:
       - db_mysql
+
