@@ -2,6 +2,7 @@ import json
 import time
 import sys
 import os
+import logging
 import arrow
 from datetime import date
 from abc import ABC, abstractmethod
@@ -17,6 +18,18 @@ from models.catalog_item import CatalogItem
 import timeit
 from kafka import KafkaProducer
 
+# Crear un logger
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+# Crear un manejador para escribir los logs a un archivo
+file_handler = logging.FileHandler('app.log')
+logger.addHandler(file_handler)
+
+# Crear un manejador para escribir los logs a stdout
+stream_handler = logging.StreamHandler()
+logger.addHandler(stream_handler)
+
 # Cargar la variable de entorno KAFKA_HOST
 kafka_host = os.getenv('KAFKA_HOST', 'localhost')
 
@@ -25,7 +38,7 @@ catalog_items_jsonl = []
 
 producer = KafkaProducer(bootstrap_servers=f'{kafka_host}:9092')
 
-# print("Funciona")
+# logging.info("Funciona")
 class CarsoSelenium(ABC):
     """ Base class for our carso-based catalog seleniumm """
     @abstractmethod
@@ -64,24 +77,24 @@ class CarsoSelenium(ABC):
             """, element, position)
         
         def find_element_text(driver, xpath): # Funcion para seleccionar el texto de un elemento por medio de xpath
-            # print(xpath)
-            # print(driver)
+            # logging.info(xpath)
+            # logging.info(driver)
             try:
                 element = driver.find_element(By.XPATH, xpath)
-                # print(element.text) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
+                # logging.info(element.text) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
                 return element.text
             except Exception as e:
-                print(f"Error: $e")# Impresion para asegurarse de que esta haciendo iteraciones correctamente
-                # print("Errores extraños")
+                logging.info(f"Error: $e")# Impresion para asegurarse de que esta haciendo iteraciones correctamente
+                # logging.info("Errores extraños")
                 return "Error"
             
         def Categoria(url, category, driver): # Funcion donde se obtiene la informacion de cada producto de todas las paginas "Next" que contiene la categoria
             try: # Validar inexistente driver
                 driver.quit()
             except Exception as e:
-                print("Ningun driver")
+                logging.info("Ningun driver")
 
-            print("Cargando nuevo driver...")
+            logging.info("Cargando nuevo driver...")
             time.sleep(5)
 
             
@@ -132,7 +145,7 @@ class CarsoSelenium(ABC):
 
                 if self.gcount % 100 == 0: # Cada 100 productos actualizaremos el driver para optimizacion
                     driver.quit()
-                    print("Cargando nuevo driver...")
+                    logging.info("Cargando nuevo driver...")
                     time.sleep(5)
                     
                     # Seccion para configurar Selenium
@@ -164,17 +177,17 @@ class CarsoSelenium(ABC):
                 # Tiempo de espera para dejar cargando la pagina
                 time.sleep(3)
                 
-                print("Categoría ",category) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
+                logging.info("Categoría ",category) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
 
                 # Recoleccion del nombre del producto
                 name = find_element_text(driver, self.name) #'//h1[@class="h2"]'
 
                 try: # Recoleccion del precio del producto
-                    # print(get_text_exclude_children(driver, driver.find_element(By.XPATH, self.price), 0)) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
+                    # logging.info(get_text_exclude_children(driver, driver.find_element(By.XPATH, self.price), 0)) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
                     price = get_text_exclude_children(driver, driver.find_element(By.XPATH, self.price), 0) #'//div[@class="pPrice"][text()]'
                 except Exception as e:
-                    # print("Precio")
-                    print(f"Error: $e") # Impresion para asegurarse de que esta haciendo iteraciones correctamente
+                    # logging.info("Precio")
+                    logging.info(f"Error: $e") # Impresion para asegurarse de que esta haciendo iteraciones correctamente
                     price = "Error"
 
                 # Recoleccion de la descripcion del producto
@@ -185,15 +198,15 @@ class CarsoSelenium(ABC):
                     try:
                         driver.find_element(By.ID, "react-tabs-2").click()
                     except Exception as e:
-                        print("Visibilidad")
-                        print(f"Error: $e") 
+                        logging.info("Visibilidad")
+                        logging.info(f"Error: $e") 
 
                 if "Sanborns" == self.shop: # Si es la pagina Sanborns, se hace click en un boton para activar la visibilidad de las especificaciones
                     try:
                         driver.find_element(By.ID, "react-tabs-2").click()
                     except Exception as e:
-                        print("Visibilidad")
-                        print(f"Error: $e") 
+                        logging.info("Visibilidad")
+                        logging.info(f"Error: $e") 
 
                 try: # Recoleccion de las especificaciones
                     li_elements = driver.find_elements(By.XPATH, self.specifications) #'//ul[@class="listAttributes"]/li'
@@ -202,22 +215,22 @@ class CarsoSelenium(ABC):
                         value = str(li.find_element(By.CLASS_NAME, self.classspecifications[1]).text) #atributesValue xh-highlight
                         specifications[key] = value
                 except Exception as e:
-                    print("Especificaciones")
-                    print(f"Error: $e") 
+                    logging.info("Especificaciones")
+                    logging.info(f"Error: $e") 
 
-                # print(specifications) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
+                # logging.info(specifications) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
 
                 try:
                     elements = driver.find_elements(By.XPATH, self.picture) #'//div/img[@class="imagenInferiorActual"]'
                     pictures = [element.get_attribute('src') for element in elements]
                     pictures = list(map(str, pictures))
                 except Exception as e:
-                    print("Imagen")
-                    print(f"Error: $e")
+                    logging.info("Imagen")
+                    logging.info(f"Error: $e")
                 
-                # print(pictures) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
+                # logging.info(pictures) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
 
-                # print(self.date) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
+                # logging.info(self.date) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
 
                 try: # Cambiamos el formato del precio a float
                     price = float(price.replace('$', '').replace(',', ''))
@@ -241,10 +254,10 @@ class CarsoSelenium(ABC):
                 data = json.dumps(catalog_items[-1].__dict__, default=date_handler, ensure_ascii=False)
                 producer.send('productos', value=data.encode('utf-8'))
                 producer.flush()
-                print(self.gcount, " productos almacenados.") # Impresion para asegurarse de que esta haciendo iteraciones correctamente
-                #print(json.dumps(catalog_items[-1].__dict__, default=date_handler, ensure_ascii=False))
+                logging.info(self.gcount, " productos almacenados.") # Impresion para asegurarse de que esta haciendo iteraciones correctamente
+                #logging.info(json.dumps(catalog_items[-1].__dict__, default=date_handler, ensure_ascii=False))
 
-		#print(catalog_items)
+		#logging.info(catalog_items)
                 
 		# catalog_items_jsonl.append({
                 #     'id': str(uuid.uuid1()),
@@ -262,7 +275,7 @@ class CarsoSelenium(ABC):
                 #     f.write(",\n")
                 end = timeit.default_timer()
 
-                print(f"Tiempo de ejecucion: {end - start} segundos para escribir en el archivo json.")        
+                logging.info(f"Tiempo de ejecucion: {end - start} segundos para escribir en el archivo json.")        
 
             # Volvemos a la direccion url de la categoria o del "Next" si entro por recursividad
             driver.get(url)
@@ -270,20 +283,20 @@ class CarsoSelenium(ABC):
             try: # Obtenemos la url del boton next, este es por si la clase se llama " next"
                 tagsN = driver.find_element(By.XPATH, '//a[@class=" next"]') #'//a[@class=" next"]'
                 urlsN = tagsN.get_attribute('href')
-                # print(urlsN) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
+                # logging.info(urlsN) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
                 Categoria(urlsN, category, driver)
             except Exception as a:
                 try: # Por si la clase se llama "next"
                     tagsN = driver.find_element(By.XPATH, '//a[@class="next"]') #'//a[@class=" next"]'
                     urlsN = tagsN.get_attribute('href')
-                    # print(urlsN) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
+                    # logging.info(urlsN) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
                     Categoria(urlsN, category, driver)
                 except Exception as e:
-                    print(f"Error: $e")
-                    print("-----Vacio-----") # Impresion para asegurarse de que esta haciendo iteraciones correctamente
+                    logging.info(f"Error: $e")
+                    logging.info("-----Vacio-----") # Impresion para asegurarse de que esta haciendo iteraciones correctamente
         
         
-        # print("funciona")
+        # logging.info("funciona")
 
         # Seccion para configurar Selenium
 
@@ -312,7 +325,7 @@ class CarsoSelenium(ABC):
 
 
 
-        # print("funciona")
+        # logging.info("funciona")
         # Pagina principal
         url = self.url #Ej. "https://www.sears.com.mx/"
         
@@ -321,26 +334,26 @@ class CarsoSelenium(ABC):
         # 5 segundos de margen para encontrar el elemento.
         driver.implicitly_wait(5)
 
-        # print("funciona?")
+        # logging.info("funciona?")
         # Elemento xpath donde se encuentra todas las categorias
         try:
             tags = driver.find_elements(By.XPATH, self.category) #'//li[@class="alone marginTopCa"]/a'
         except Exception as e:
-            print(f"Error: $e")
+            logging.info(f"Error: $e")
 
 
-        # print("funcionamos previo")
+        # logging.info("funcionamos previo")
         for tag in tags: # Se crea una lista de URLs de cada categoria y del nombre de las categorias 
-            # print("funcionamos en itera?")
+            # logging.info("funcionamos en itera?")
             urls.append(tag.get_attribute('href'))
             categories.append(tag.get_attribute("innerHTML"))   
 
-        # print("funcionamos")
+        # logging.info("funcionamos")
         # Hacemos zip al url y su respectiva categoria
         url_category = zip(urls, categories)
 
         for url, category in url_category: # Hacemos iteracion por cada categoria conseguida en la pagina
-            # print("Funcionaaa?")
+            # logging.info("Funcionaaa?")
             Categoria(url, category, driver)
 
         driver.quit() # Cerramos el driver
