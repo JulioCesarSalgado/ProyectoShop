@@ -13,10 +13,10 @@ services:
   kafka:
     image: bitnami/kafka:3.5.1
     ports:
-      - '9092:9092'
+      - '${PORT_KAFKA_HOST}:${PORT_KAFKA_HOST}'
     environment:
       - KAFKA_CFG_BROKER_ID=0
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://${KAFKA_HOST}:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://${KAFKA_HOST}:${PORT_KAFKA_HOST}
       - KAFKA_CFG_NUM_NETWORK_THREADS=3
       - KAFKA_CFG_NUM_IO_THREADS=8
       - KAFKA_CFG_SOCKET_SEND_BUFFER_BYTES=102400
@@ -40,16 +40,20 @@ services:
 
 
   producer_scrapy:
-    image: chasen64/scrapingshop:6.0.0
+    image: chasen64/scrapingshop:7.0.0
     shm_size: '2g'
     depends_on:
       - kafka
+    env_file:
+      - .env
   
   consumer_productos:
-    image: chasen64/consumersshop:1.0.0
+    image: chasen64/consumersshop:2.0.0
     shm_size: '2g'
     depends_on:
       - producer_scrapy
+    env_file:
+      - .env
 
   db_mysql:
     image: mysql:8.1.0
@@ -66,8 +70,10 @@ services:
 
 
   consumer_mysql:
-    image: chasen64/consumermysqlshop:1.0.0
+    image: chasen64/consumermysqlshop:2.0.0
     shm_size: '2g'
     depends_on:
       - db_mysql
+    env_file:
+      - .env
 
