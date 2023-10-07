@@ -4,8 +4,6 @@ import logging
 import time
 from kafka import KafkaConsumer
 
-kafka_host = os.getenv('KAFKA_HOST', 'localhost')
-
 # Crear un logger
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -18,8 +16,19 @@ logger.addHandler(file_handler)
 stream_handler = logging.StreamHandler()
 logger.addHandler(stream_handler)
 
+while True:
+    kafka_host = os.environ.get('KAFKA_HOST')
+    port_kafka_host = os.environ.get('PORT_KAFKA_HOST')
+
+    if kafka_host is not None and port_kafka_host is not None:
+        # Las variables de entorno están disponibles, sal del bucle
+        break
+
+    logging.info("Esperando a que las variables de entorno estén disponibles...")
+    time.sleep(10)
+
 # Crear una instancia del consumidor
-consumer = KafkaConsumer(bootstrap_servers=f'{kafka_host}:9092', auto_offset_reset='latest')
+consumer = KafkaConsumer(bootstrap_servers=f'{kafka_host}:{port_kafka_host}', auto_offset_reset='latest')
 
 while True:
     # Verificar si el tema existe
