@@ -30,15 +30,23 @@ logger.addHandler(file_handler)
 stream_handler = logging.StreamHandler()
 logger.addHandler(stream_handler)
 
-# Cargar la variable de entorno KAFKA_HOST
-kafka_host = os.getenv('KAFKA_HOST', 'localhost')
+while True:
+    kafka_host = os.environ.get('KAFKA_HOST')
+    port_kafka_host = os.environ.get('PORT_KAFKA_HOST')
+
+    if kafka_host is not None and port_kafka_host is not None:
+        # Las variables de entorno están disponibles, sal del bucle
+        break
+
+    logging.info("Esperando a que las variables de entorno estén disponibles...")
+    time.sleep(10)
 
 catalog_items = []
 catalog_items_jsonl = []
 
-producer = KafkaProducer(bootstrap_servers=f'{kafka_host}:9092')
+producer = KafkaProducer(bootstrap_servers=f'{kafka_host}:{port_kafka_host}')
 
-# logging.info("Funciona")
+logging.info("Funciona")
 class CarsoSelenium(ABC):
     """ Base class for our carso-based catalog seleniumm """
     @abstractmethod
@@ -177,7 +185,7 @@ class CarsoSelenium(ABC):
                 # Tiempo de espera para dejar cargando la pagina
                 time.sleep(3)
                 
-                logging.info("Categoría ",category) # Impresion para asegurarse de que esta haciendo iteraciones correctamente
+                logging.info(f"Categoría {category}") # Impresion para asegurarse de que esta haciendo iteraciones correctamente
 
                 # Recoleccion del nombre del producto
                 name = find_element_text(driver, self.name) #'//h1[@class="h2"]'
@@ -254,7 +262,7 @@ class CarsoSelenium(ABC):
                 data = json.dumps(catalog_items[-1].__dict__, default=date_handler, ensure_ascii=False)
                 producer.send('productos', value=data.encode('utf-8'))
                 producer.flush()
-                logging.info(self.gcount, " productos almacenados.") # Impresion para asegurarse de que esta haciendo iteraciones correctamente
+                logging.info(f"{self.gcount} productos almacenados.") # Impresion para asegurarse de que esta haciendo iteraciones correctamente
                 #logging.info(json.dumps(catalog_items[-1].__dict__, default=date_handler, ensure_ascii=False))
 
 		#logging.info(catalog_items)
