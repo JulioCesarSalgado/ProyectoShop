@@ -4,6 +4,9 @@ import logging
 from kafka import KafkaConsumer
 import mysql.connector
 import time
+import signal
+import sys
+
 
 # Crear un logger
 logger = logging.getLogger()
@@ -17,6 +20,10 @@ logger.addHandler(file_handler)
 stream_handler = logging.StreamHandler()
 logger.addHandler(stream_handler)
 
+def handler(signum, frame):
+    logging.info('Señal capturada, cerrando...')
+    sys.exit(0)
+
 while True:
     kafka_host = os.environ.get('KAFKA_HOST')
     port_kafka_host = os.environ.get('PORT_KAFKA_HOST')
@@ -29,7 +36,7 @@ while True:
     time.sleep(10)
 
 # Crear una instancia del consumidor
-consumer = KafkaConsumer(bootstrap_servers=f'{kafka_host}:{port_kafka_host}', auto_offset_reset='earliest')
+consumer = KafkaConsumer(bootstrap_servers=f'{kafka_host}:{port_kafka_host}', group_id='save_DB')
 
 while True:
     # Verificar si el tema existe
@@ -81,11 +88,22 @@ for message in consumer:
     logging.info(f"Imagenes: {data['pictures']}\n")
     logging.info(f"Fecha: {data['date']}\n")
     
-    # Insertar datos en la base de datos
-    sql = """INSERT INTO producto (id, name, price, `desc`, category, specifications, pictures, date) 
-             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
-    val = (data['id'], data['name'], data['price'], data['desc'], data['category'], json.dumps(data['specifications']), json.dumps(data['pictures']), data['date'])
-    cursor.execute(sql, val)
+    # Verificar si el registro ya existe en la base de datos
+    cursor.execute("SELECT COUNT(*) FROM producto WHERE id = %s", (data['id'],))
+    count = cursor.fetchone()[0]
+
+    if count == 0:
+        # Si el registro no existe, insertarlo en la base de datos
+        sql = """INSERT INTO producto (id, name, price, `desc`, category, specifications, pictures, date) 
+                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+        val = (data['id'], data['name'], data['price'], data['desc'], data['category'], json.dumps(data['specifications']), json.dumps(data['pictures']), data['date'])
+        cursor.execute(sql, val)
 
     # Hacer commit de la transacción
     db.commit()
+
+    # Confirmar el offset del mensaje
+    consumer.commit()
+
+    signal.signal(signal.SIGINT, handler)
+    signal.signal(signal.SIGTERM, handler)
