@@ -41,7 +41,7 @@ services:
 
 
   producer_scrapy:
-    image: chasen64/scrapingshop:7.0.0
+    image: chasen64/scrapingshop:8.0.0
     shm_size: '2g'
     depends_on:
       - kafka
@@ -49,7 +49,7 @@ services:
       - .env
   
   consumer_productos:
-    image: chasen64/consumersshop:3.0.0
+    image: chasen64/consumersshop:4.0.0
     shm_size: '2g'
     depends_on:
       - producer_scrapy
@@ -71,7 +71,7 @@ services:
 
 
   consumer_mysql:
-    image: chasen64/consumermysqlshop:3.0.0
+    image: chasen64/consumermysqlshop:4.0.0
     shm_size: '2g'
     depends_on:
       - db_mysql
