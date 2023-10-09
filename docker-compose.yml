@@ -32,6 +32,7 @@ services:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_CFG_ZOOKEEPER_CONNECTION_TIMEOUT_MS=18000
       - KAFKA_CFG_GROUP_INITIAL_REBALANCE_DELAY_MS=0
+      - KAFKA_CFG_OFFSETS_RETENTION_MINUTES=10080
     depends_on:
       - zookeeper
     volumes:
@@ -48,7 +49,7 @@ services:
       - .env
   
   consumer_productos:
-    image: chasen64/consumersshop:2.0.0
+    image: chasen64/consumersshop:3.0.0
     shm_size: '2g'
     depends_on:
       - producer_scrapy
@@ -70,7 +71,7 @@ services:
 
 
   consumer_mysql:
-    image: chasen64/consumermysqlshop:2.0.0
+    image: chasen64/consumermysqlshop:3.0.0
     shm_size: '2g'
     depends_on:
       - db_mysql
