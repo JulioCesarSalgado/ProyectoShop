@@ -14,5 +14,6 @@ class CatalogItem(BaseModel):
     category: str | None                    # Item category. Free form string for now. Optional field
     specifications: dict[str, str] | None   # Key, value pairs with specifications. Optional field
     pictures: list[str]                     # Keep a list of file names with the item's pictures.
+    url: str                               # Links of products
                                             # If none, it will be an empty list
     date: datetime.date                     # Date of scraping
