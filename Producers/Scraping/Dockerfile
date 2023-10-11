@@ -14,6 +14,7 @@ RUN yes | sudo pip3.10 install pydantic
 RUN yes | sudo pip3.10 install jsonlines
 RUN yes | sudo pip3.10 install arrow
 RUN yes | sudo pip3.10 install kafka-python
+RUN yes | sudo pip3.10 install mysql-connector-python
 RUN sudo rm /usr/bin/chromedriver
 
 COPY . /app
