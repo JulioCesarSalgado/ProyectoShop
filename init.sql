@@ -15,3 +15,15 @@ CREATE TABLE producto (
 
 GRANT ALL PRIVILEGES ON productos.* TO 'usuario'@'%';
 FLUSH PRIVILEGES;
+
+CREATE DATABASE links CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE links;
+
+CREATE TABLE link (
+    id INT AUTO_INCREMENT,
+    url VARCHAR(2083) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
+    PRIMARY KEY(id)
+);
+
+GRANT ALL PRIVILEGES ON links.* TO 'usuario'@'%';
+FLUSH PRIVILEGES;
