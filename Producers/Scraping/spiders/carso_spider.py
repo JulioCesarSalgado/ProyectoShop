@@ -17,6 +17,20 @@ sys.path.append(root_dir)
 from models.catalog_item import CatalogItem
 import timeit
 from kafka import KafkaProducer
+import mysql.connector
+import signal
+import sys
+
+while True:
+    kafka_host = os.environ.get('KAFKA_HOST')
+    port_kafka_host = os.environ.get('PORT_KAFKA_HOST')
+
+    if kafka_host is not None and port_kafka_host is not None:
+        # Las variables de entorno están disponibles, sal del bucle
+        break
+
+    logging.info("Esperando a que las variables de entorno estén disponibles...")
+    time.sleep(10)
 
 # Crear un logger
 logger = logging.getLogger()
@@ -29,17 +43,6 @@ logger.addHandler(file_handler)
 # Crear un manejador para escribir los logs a stdout
 stream_handler = logging.StreamHandler()
 logger.addHandler(stream_handler)
-
-while True:
-    kafka_host = os.environ.get('KAFKA_HOST')
-    port_kafka_host = os.environ.get('PORT_KAFKA_HOST')
-
-    if kafka_host is not None and port_kafka_host is not None:
-        # Las variables de entorno están disponibles, sal del bucle
-        break
-
-    logging.info("Esperando a que las variables de entorno estén disponibles...")
-    time.sleep(10)
 
 catalog_items = []
 catalog_items_jsonl = []
@@ -72,6 +75,10 @@ class CarsoSelenium(ABC):
         urls = []
         categories = []
 
+        def handler(signum, frame):
+            logging.info('Señal capturada, cerrando...')
+            sys.exit(0)
+
 
         def get_text_exclude_children(driver, element, position): # Funcion para seleccionar el primer nodo de un texto en el cuerpo HTML
             return driver.execute_script("""
@@ -97,13 +104,40 @@ class CarsoSelenium(ABC):
                 return "Error"
             
         def Categoria(url, category, driver): # Funcion donde se obtiene la informacion de cada producto de todas las paginas "Next" que contiene la categoria
+                    
+            # Crear una conexión a la base de datos
+            db = mysql.connector.connect(
+                host=kafka_host,
+                user="usuario",
+                password="ejemplo",
+            )
+
+            # Crear un cursor
+            cursor = db.cursor()
+
+            while True:
+                # Verificar si la base de datos existe
+                cursor.execute("SHOW DATABASES LIKE 'links'")
+                result = cursor.fetchone()
+                
+                if result:
+                    # Si la base de datos existe, seleccionarla y salir del bucle
+                    cursor.execute("USE links")
+                    break
+                else:
+                    # Si la base de datos no existe, esperar 5 segundos y luego volver a intentarlo
+                    print("La base de datos 'links' no existe, reintentando en 5 segundos")
+                    time.sleep(5)
+
             try: # Validar inexistente driver
                 driver.quit()
             except Exception as e:
                 logging.info("Ningun driver")
 
             logging.info("Cargando nuevo driver...")
+            logging.info(url)
             time.sleep(5)
+
 
             
             # Seccion para configurar Selenium
@@ -149,7 +183,6 @@ class CarsoSelenium(ABC):
                 count += 1
                 self.gcount += 1
 
-                
 
                 if self.gcount % 100 == 0: # Cada 100 productos actualizaremos el driver para optimizacion
                     driver.quit()
@@ -177,6 +210,20 @@ class CarsoSelenium(ABC):
 
                     # Cierre de seccion para configurar Selenium
                     
+
+                # Verificar si la URL ya existe en la base de datos
+                cursor.execute("SELECT COUNT(*) FROM link WHERE url = %s", (urls,))
+                count = cursor.fetchone()[0]
+
+                if count > 0:
+                    # Si la URL ya existe en la base de datos, omitir esta iteración
+                    logging.info(f"La URL {urls} ya existe en la base de datos, omitiendo...")
+                    logging.info(f"{self.gcount} productos almacenados.") # Impresion para asegurarse de que esta haciendo iteraciones correctamente
+                    end = timeit.default_timer()
+                    logging.info(f"Tiempo de ejecucion: {end - start} segundos para escribir en el archivo json.")
+                    signal.signal(signal.SIGINT, handler)
+                    signal.signal(signal.SIGTERM, handler)   
+                    continue
 
                 # Direccion del producto en la iteracion n
 
@@ -245,7 +292,7 @@ class CarsoSelenium(ABC):
                 except Exception as e:
                     price = 0.000
 
-		# Generar un UUID
+                # Generar un UUID
                 item_id = str(uuid.uuid4())
 
                 catalog_items.append(CatalogItem( # Guardamos la informacion a una lista.
@@ -255,7 +302,8 @@ class CarsoSelenium(ABC):
                     desc = description,
                     category = str(category),
                     specifications = specifications,
-                    pictures= pictures,
+                    pictures = pictures,
+                    url = urls,
                     date = arrow.now().format('YYYY-MM-DD')
                 ))
 
@@ -283,7 +331,9 @@ class CarsoSelenium(ABC):
                 #     f.write(",\n")
                 end = timeit.default_timer()
 
-                logging.info(f"Tiempo de ejecucion: {end - start} segundos para escribir en el archivo json.")        
+                logging.info(f"Tiempo de ejecucion: {end - start} segundos para escribir en el archivo json.")
+                signal.signal(signal.SIGINT, handler)
+                signal.signal(signal.SIGTERM, handler)              
 
             # Volvemos a la direccion url de la categoria o del "Next" si entro por recursividad
             driver.get(url)
