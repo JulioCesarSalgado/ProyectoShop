@@ -39,9 +39,8 @@ services:
       - ./Data/kafka_data:/bitnami/kafka
     user: root
 
-
   producer_scrapy:
-    image: chasen64/scrapingshop:8.0.0
+    image: chasen64/scrapingshop:10.0.0
     shm_size: '2g'
     depends_on:
       - kafka
@@ -49,7 +48,7 @@ services:
       - .env
   
   consumer_productos:
-    image: chasen64/consumersshop:4.0.0
+    image: chasen64/consumersshop:5.0.0
     shm_size: '2g'
     depends_on:
       - producer_scrapy
@@ -69,7 +68,6 @@ services:
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
-
   consumer_mysql:
     image: chasen64/consumermysqlshop:4.0.0
     shm_size: '2g'
@@ -78,3 +76,10 @@ services:
     env_file:
       - .env
 
+  consumer_url:
+    image: chasen64/consumermysqlshopurl:1.0.0
+    shm_size: '2g'
+    depends_on:
+      - db_mysql
+    env_file:
+      - .env
