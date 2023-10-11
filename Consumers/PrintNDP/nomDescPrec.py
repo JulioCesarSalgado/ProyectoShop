@@ -59,6 +59,7 @@ for message in consumer:
     logging.info(f"Categiría: {data['category']}\n")
     logging.info(f"Especificaciones: {data['specifications']}\n")
     logging.info(f"Imagenes: {data['pictures']}\n")
+    logging.info(f"Url: {data['url']}\n")
     logging.info(f"Fecha: {data['date']}\n")
 
     # Confirmar el offset del mensaje
