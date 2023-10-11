@@ -1,14 +1,17 @@
-# Proyecto de Ingeniería de Datos - *TERMINADO.*
+# Proyecto de Ingeniería de Datos
 
 Este es un proyecto personal diseñado para demostrar habilidades en Ingeniería de Datos. El proyecto consta de varias partes que trabajan juntas para recopilar, procesar y almacenar datos.
 
 ## Descripción del Proyecto
 
-1. **Scraping**: El proyecto comienza con un proceso de scraping que recopila información de productos de tres páginas web diferentes.
+1. **Scraping**: El proyecto comienza con un proceso de scraping que recopila información de productos de tres páginas web diferentes. Este proceso utiliza Selenium para interactuar con las páginas web y obtener los datos necesarios.
 
 2. **Kafka**: Los datos recopilados se envían a un servidor Kafka como productor.
 
-3. **Consumidores**: Hay dos consumidores en el proyecto. Uno simplemente imprime los productos recibidos y el otro inserta los datos en una base de datos MySQL.
+3. **Consumidores**: Hay tres consumidores en el proyecto:
+   - El primer consumidor simplemente imprime los productos recibidos.
+   - El segundo consumidor almacena las características de los productos en una base de datos MySQL.
+   - El tercer consumidor almacena las URL de los productos en una base de datos MySQL.
 
 4. **Docker y Docker Compose**: Todos estos componentes se ejecutan en contenedores Docker, orquestados con Docker Compose.
 
@@ -26,7 +29,24 @@ Este es un proyecto personal diseñado para demostrar habilidades en Ingeniería
 
 ## Cómo Ejecutar el Proyecto
 
-(Instrucciones para clonar el repositorio, instalar dependencias, configurar variables de entorno, etc.)
+Sigue estos pasos para ejecutar el proyecto:
+
+### 1. Instalar Docker y Docker Compose
+Primero, asegúrate de tener Docker y Docker Compose instalados en tu máquina. Puedes descargarlos desde la página oficial de Docker.
+
+### 2. Clonar el repositorio
+Clona el repositorio en tu máquina local utilizando el siguiente comando en tu terminal:
+
+```git clone https://github.com/JulioCesarSalgado/ProyectoShop.git```
+
+### 3. Iniciar los servicios con Docker Compose
+Navega al directorio del proyecto:
+
+```cd ProyectoShop```
+
+Inicia todos los servicios utilizando Docker Compose con el siguiente comando:
+
+```docker compose up -d```
 
 ## Licencia
 
