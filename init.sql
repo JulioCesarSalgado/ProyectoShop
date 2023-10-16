@@ -21,7 +21,7 @@ USE links;
 
 CREATE TABLE link (
     id INT AUTO_INCREMENT,
-    url VARCHAR(2083) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL
+    url VARCHAR(2083) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
     PRIMARY KEY(id)
 );
 
