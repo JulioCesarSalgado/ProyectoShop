@@ -2,6 +2,7 @@ import os
 import time
 import logging
 from kafka.admin import KafkaAdminClient, NewTopic
+from kafka.errors import NoBrokersAvailable
 
 # Crear un logger
 logger = logging.getLogger()
