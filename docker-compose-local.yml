@@ -1,59 +1,73 @@
 version: '3.8'
 services:
   zookeeper:
-    image: bitnami/zookeeper:3.9.0
+    image: confluentinc/cp-zookeeper:7.5.1
     ports:
       - '2181:2181'
     environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOOKEEPER_CLIENT_PORT=2181
     volumes:
-      - ./Data/zookeeper_data:/bitnami/zookeeper
+      - ./Data_local/zookeeper_data/zk-data:/var/lib/zookeeper/data
+      - ./Data_local/zookeeper_data/zk-txn-logs:/var/lib/zookeeper/log
     user: root
+    container_name: proyectoshop-zookeeper-1_local
+    networks:
+      - proyectoshop_default_local
 
   kafka:
-    image: bitnami/kafka:3.5.1
+    image: confluentinc/cp-kafka:7.5.1
     ports:
       - '${PORT_KAFKA_HOST}:${PORT_KAFKA_HOST}'
     environment:
-      - KAFKA_CFG_BROKER_ID=0
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://${KAFKA_HOST}:${PORT_KAFKA_HOST}
-      - KAFKA_CFG_NUM_NETWORK_THREADS=3
-      - KAFKA_CFG_NUM_IO_THREADS=8
-      - KAFKA_CFG_SOCKET_SEND_BUFFER_BYTES=102400
-      - KAFKA_CFG_SOCKET_RECEIVE_BUFFER_BYTES=102400
-      - KAFKA_CFG_SOCKET_REQUEST_MAX_BYTES=104857600
-      - KAFKA_CFG_NUM_PARTITIONS=1
-      - KAFKA_CFG_NUM_RECOVERY_THREADS_PER_DATA_DIR=1
-      - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1
-      - KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
-      - KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR=1
-      - KAFKA_CFG_LOG_RETENTION_HOURS=168
-      - KAFKA_CFG_LOG_RETENTION_CHECK_INTERVAL_MS=300000
-      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_CFG_ZOOKEEPER_CONNECTION_TIMEOUT_MS=18000
-      - KAFKA_CFG_GROUP_INITIAL_REBALANCE_DELAY_MS=0
-      - KAFKA_CFG_OFFSETS_RETENTION_MINUTES=10080
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${KAFKA_HOST}:${PORT_KAFKA_HOST}
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=2
     depends_on:
       - zookeeper
     volumes:
-      - ./Data/kafka_data:/bitnami/kafka
+      - ./Data_local/kafka_data_1:/var/lib/kafka/data
     user: root
+    container_name: proyectoshop-kafka-1_local
+    networks:
+      - proyectoshop_default_local
+
+  kafka_2:
+    image: confluentinc/cp-kafka:7.5.1
+    ports:
+      - '${PORT_KAFKA_REMOTE}:${PORT_KAFKA_REMOTE}'
+    environment:
+      - KAFKA_BROKER_ID=2
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://${KAFKA_REMOTE}:${PORT_KAFKA_REMOTE}
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=2
+    depends_on:
+      - zookeeper
+      - kafka
+    volumes:
+      - ./Data_local/kafka_data_2:/var/lib/kafka/data
+    user: root
+    container_name: proyectoshop-kafka_2-1_local
+    networks:
+      - proyectoshop_default_local
 
   producer_scrapy:
     image: chasen64/scrapingshop:10.0.0
     shm_size: '2g'
-    depends_on:
-      - kafka
     env_file:
       - .env
+    container_name: proyectoshop-producer_scrapy-1_local
+    networks:
+      - proyectoshop_default_local
   
   consumer_productos:
     image: chasen64/consumersshop:5.0.0
     shm_size: '2g'
-    depends_on:
-      - producer_scrapy
     env_file:
       - .env
+    container_name: proyectoshop-consumer_productos-1_local
+    networks:
+      - proyectoshop_default_local
 
   db_mysql:
     image: mysql:8.1.0
@@ -67,19 +81,28 @@ services:
       MYSQL_PASSWORD: ejemplo
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./Data_local/mysql_data:/var/lib/mysql
+    container_name: proyectoshop-db_mysql-1_local
+    networks:
+      - proyectoshop_default_local
 
   consumer_mysql:
     image: chasen64/consumermysqlshop:4.0.0
     shm_size: '2g'
-    depends_on:
-      - db_mysql
     env_file:
       - .env
+    container_name: proyectoshop-consumer_mysql-1_local
+    networks:
+      - proyectoshop_default_local
 
   consumer_url:
     image: chasen64/consumermysqlshopurl:1.0.0
     shm_size: '2g'
-    depends_on:
-      - db_mysql
     env_file:
       - .env
+    container_name: proyectoshop-consumer_url-1_local
+    networks:
+      - proyectoshop_default_local
+
+networks:
+  proyectoshop_default_local: {}
