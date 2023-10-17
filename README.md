@@ -117,3 +117,62 @@ Para detener completamente el proyecto en un entorno remoto, primero debes deten
 Luego, puedes detener los servicios utilizando el script proporcionado:
 
 ```./Scripts/down-remote.sh```
+
+## Monitoreo del Proyecto
+
+El monitoreo es una parte crucial de cualquier proyecto de ingeniería de datos. Te permite entender el estado actual de tu sistema y te ayuda a identificar y solucionar problemas rápidamente.
+
+### Ver los Logs
+
+Para ver los logs del proyecto en un entorno local, puedes usar el siguiente comando:
+
+```docker-compose -f docker-compose-local.yml logs -f```
+
+Para un entorno remoto, el comando sería:
+
+```docker-compose -f docker-compose-remote.yml logs -f```
+
+### Ver el Estado de los Contenedores
+
+Para ver el estado actual de todos los contenedores Docker, puedes usar el siguiente comando:
+
+```docker ps -a```
+
+Este comando te mostrará una lista de todos los contenedores, junto con su ID, imagen, comando, cuándo se crearon, estado, puertos y nombres.
+
+### Lista de Contenedores
+
+Aquí tienes una lista de los contenedores que existen en tu proyecto:
+
+#### Entorno Local
+
+- proyectoshop-kafka_2-1_local
+- proyectoshop-kafka-1_local
+- proyectoshop-producer_scrapy-1_local
+- proyectoshop-zookeeper-1_local
+- proyectoshop-consumer_mysql-1_local
+- proyectoshop-consumer_url-1_local
+- proyectoshop-db_mysql-1_local
+- proyectoshop-consumer_productos-1_local
+
+#### Entorno Remoto
+
+- proyectoshop-kafka-1_remote
+- proyectoshop-producer_scrapy-1_remote
+- proyectoshop-zookeeper-1_remote
+- proyectoshop-consumer_url-1_remote
+- proyectoshop-consumer_mysql-1_remote
+- proyectoshop-consumer_productos-1_remote
+- proyectoshop-db_mysql-1_remote
+
+### Entrar a un Contenedor
+
+Para entrar a un contenedor específico, puedes usar el siguiente comando, reemplazando `nombre_del_contenedor` con el nombre del contenedor al que deseas acceder:
+
+```docker exec -it nombre_del_contenedor /bin/bash```
+
+Por ejemplo, para entrar al contenedor `proyectoshop-db_mysql-1_remote`, usarías:
+
+```docker exec -it proyectoshop-db_mysql-1_remote /bin/bash```
+
+Una vez dentro del contenedor, puedes ejecutar comandos como si estuvieras en la línea de comandos del sistema operativo del contenedor. Por ejemplo, podrías entrar al entorno MySQL para ver las tablas y demás.
