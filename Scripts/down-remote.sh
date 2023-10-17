@@ -4,7 +4,7 @@
 docker compose -f docker-compose-remote.yml down -v
 
 # Borrar volumenes
-for dir in "./Data_remote/zookeeper_data" "./Data_remote/kafka_data_1" "./Data_remote/mysql_data"; do
+for dir in "./Data_remote/zookeeper_data" "./Data_remote/kafka_data" "./Data_remote/mysql_data"; do
   echo "Ubicación actual: $(pwd)"
   if [ -d "$dir" ] && [ "$(ls -A $dir)" ]; then
     echo "Cambiando a directorio: $dir"
