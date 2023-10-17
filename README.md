@@ -31,23 +31,89 @@ Este es un proyecto personal diseñado para demostrar habilidades en Ingeniería
 
 Sigue estos pasos para ejecutar el proyecto:
 
-### 1. Instalar Docker y Docker Compose
-Primero, asegúrate de tener Docker y Docker Compose instalados en tu máquina. Puedes descargarlos desde la página oficial de Docker.
+### Preparación
 
-### 2. Clonar el repositorio
-Clona el repositorio en tu máquina local utilizando el siguiente comando en tu terminal:
+Antes de ejecutar el proyecto, debes modificar el archivo `.env` con la configuración correcta:
 
-```git clone https://github.com/JulioCesarSalgado/ProyectoShop.git```
+```
+KAFKA_HOST=tu_dirección_ip_del_host_de_kafka
+KAFKA_REMOTE=tu_dirección_ip_remota_de_kafka
+PORT_KAFKA_HOST=tu_puerto_del_host_de_kafka
+PORT_KAFKA_REMOTE=tu_puerto_remoto_de_kafka
+```
 
-### 3. Iniciar los servicios con Docker Compose
-Navega al directorio del proyecto:
+Para un entorno local, `KAFKA_HOST` y `KAFKA_REMOTE` deben ser la misma IP y puedes elegir cualquier puerto para `PORT_KAFKA_HOST` y `PORT_KAFKA_REMOTE`, siempre que sean diferentes.
 
-```cd ProyectoShop```
+Para un entorno remoto, `KAFKA_HOST` debe ser la IP donde se ejecuta actualmente el docker-compose y `KAFKA_REMOTE` debe ser donde está el broker remoto.
 
-Inicia todos los servicios utilizando Docker Compose con el siguiente comando:
+### Iniciar el Proyecto
 
-```docker compose up -d```
+#### Entorno Local
 
-## Licencia
+Para un entorno local con dos brokers de Kafka, simplemente ejecuta:
 
-(Información sobre la licencia, si corresponde)
+```docker-compose -f docker-compose-local.yml up -d```
+
+Para ver los logs, puedes usar:
+
+```docker-compose -f docker-compose-local.yml logs -f```
+
+### Entorno Remoto
+
+Para un entorno remoto con un broker de Kafka, sigue estos pasos:
+
+1. Ejecuta el comando Docker Compose para iniciar los servicios:
+
+```docker-compose -f docker-compose-remote.yml up -d```
+
+2. Abre los logs para monitorear el estado de los servicios:
+
+```docker-compose -f docker-compose-remote.yml logs -f```
+
+3. Espera a que aparezcan los siguientes mensajes en los logs:
+
+```Mon Oct 16 23:25:17 2023 - esperando a que broker con la IP (IP_KAFKA_REMOTE) y el puerto (PORT_KAFKA_REMOTE) esté listo...```
+
+Estos mensajes provienen de los contenedores ```proyectoshop-producer_scrapy-1_remote```, ```proyectoshop-consumer_url-1_remote```, ```proyectoshop-consumer_productos-1_remote``` y ```proyectoshop-consumer_mysql-1_remote```.
+
+4. Una vez que veas estos mensajes, inicia el broker remoto que está configurado para conectarse al zookeeper con la IP local (IP_KAFKA_LOCAL) y el puerto configurado (PORT_KAFKA_LOCAL).
+
+### Pausar el Proyecto
+
+#### Entorno Local
+
+Para pausar el proyecto en un entorno local, simplemente ejecuta:
+
+```./Scripts/stop-local.sh```
+
+#### Entorno Remoto
+
+Para pausar el proyecto en un entorno remoto, primero debes detener el broker remoto:
+
+```.\bin\windows\kafka-server-stop.bat```
+
+Luego, puedes pausar los servicios utilizando el script proporcionado:
+
+```./Scripts/stop-remote.sh```
+
+### Reanudar el Proyecto
+
+Para reanudar el proyecto, ya sea en un entorno local o remoto, simplemente vuelve a ejecutar los comandos para iniciar el proyecto.
+
+### Detener el Proyecto
+
+#### Entorno Local
+
+Para detener completamente el proyecto en un entorno local, simplemente ejecuta:
+
+```./Scripts/down-local.sh```
+
+#### Entorno Remoto
+
+Para detener completamente el proyecto en un entorno remoto, primero debes detener el broker remoto:
+
+```.\bin\windows\kafka-server-stop.bat```
+
+Luego, puedes detener los servicios utilizando el script proporcionado:
+
+```./Scripts/down-remote.sh```
