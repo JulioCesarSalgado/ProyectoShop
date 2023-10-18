@@ -15,6 +15,28 @@ Este es un proyecto personal diseñado para demostrar habilidades en Ingeniería
 
 4. **Docker y Docker Compose**: Todos estos componentes se ejecutan en contenedores Docker, orquestados con Docker Compose.
 
+## Diagrama de Flujo de Datos
+
+El siguiente diagrama muestra cómo fluyen los datos a través del sistema:
+
+[![Diagrama-de-flujo-de-datos.png](https://i.postimg.cc/Hxy8dfYZ/Diagrama-de-flujo-de-datos.png)](https://postimg.cc/wy9jk4sL)
+
+Este diagrama muestra cómo los datos son recopilados por el proceso de scraping, enviados a Kafka, y luego consumidos y almacenados en MySQL. Los componentes del sistema se ejecutan en contenedores Docker, que son orquestados con Docker Compose.
+
+## Diagrama de Red de Contenedores Docker
+
+El siguiente diagrama muestra la red de contenedores Docker utilizada en este proyecto:
+
+[![Diagrama-de-dependencias.png](https://i.postimg.cc/PJkJhy51/Diagrama-de-dependencias.png)](https://postimg.cc/bD3p9Qbv)
+
+Este diagrama muestra cómo los diferentes contenedores Docker en el sistema están interconectados. Cada nodo en el diagrama representa un contenedor Docker y las líneas entre los nodos representan las conexiones entre los contenedores.
+
+Los contenedores en la parte superior del diagrama son independientes y no dependen de ningún otro contenedor para iniciar. Sin embargo, estos contenedores son necesarios para que los contenedores en la parte media del diagrama funcionen correctamente, como se indica con las flechas que apuntan hacia abajo.
+
+Los contenedores en la parte media del diagrama dependen de los contenedores en la parte superior para iniciar, pero a su vez, son necesarios para que los contenedores en la parte inferior del diagrama funcionen correctamente.
+
+Finalmente, los contenedores en la parte inferior del diagrama dependen tanto de los contenedores en la parte superior como de los de la parte media para iniciar y funcionar correctamente.
+
 ## Tecnologías y Librerías Utilizadas
 
 - Lenguaje de programación: Python
